@@ -10,6 +10,12 @@ const WebSocketServer = require('ws').Server
 const CLIENT_DIR = '__webski'
 const INJECT = `
 <script src="/${CLIENT_DIR}/reload.js"></script>`
+const TYPES = {
+  '.html': 'text/html',
+  '.css': 'text/css',
+  '.txt': 'text/plain',
+  '.js': 'application/javascript'
+}
 
 class Webski {
   constructor (args) {
@@ -56,6 +62,16 @@ class Webski {
     })
   }
 
+  handleError (req, res, err) {
+    this.setContentType(res, '.txt')
+    res.status(404).send(`Not found: ${err.localPath}`)
+  }
+
+  setContentType (res, ext) {
+    let type = TYPES[ext]
+    type && res.setHeader('content-type', type)
+  }
+
   serve (workingDir, callback) {
     console.log(path.join(__dirname, '..', 'client'))
     express()
@@ -65,16 +81,17 @@ class Webski {
           req.path.endsWith('/') ? req.path + 'index.html' : req.path)
         let ext = path.extname(localPath)
 
-        // Set headers for CSS.
-        ext === '.css' && res.setHeader('content-type', 'text/css')
+        // Set content type header.
+        this.setContentType(res, ext)
 
         // Serve the file.
         fs.readFile(localPath, 'utf8', (err, data) => {
           if (err) {
-            return res.status(404).send(`Not found: ${localPath}`)
+            err.localPath = localPath
+            return this.handleError(req, res, err)
           }
+
           ext === '.html' ? res.send(data + INJECT) : res.send(data)
-          res.end()
         })
       })
       .listen(this.port, this.hostname, () => {
