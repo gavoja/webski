@@ -61,14 +61,20 @@ class Webski {
     express()
       .use(`/__webski`, express.static(path.join(__dirname, '..', 'client')))
       .use('/', (req, res) => {
-        let p = req.path.endsWith('/') ? req.path + 'index.html' : req.path
-        let localPath = path.join(workingDir, p)
+        let localPath = path.join(workingDir,
+          req.path.endsWith('/') ? req.path + 'index.html' : req.path)
         let ext = path.extname(localPath)
+
+        // Set headers for CSS.
+        ext === '.css' && res.setHeader('content-type', 'text/css')
+
+        // Serve the file.
         fs.readFile(localPath, 'utf8', (err, data) => {
           if (err) {
             return res.status(404).send(`Not found: ${localPath}`)
           }
-          return ext === '.html' ? res.send(data + INJECT) : res.send(data)
+          ext === '.html' ? res.send(data + INJECT) : res.send(data)
+          res.end()
         })
       })
       .listen(this.port, this.hostname, () => {

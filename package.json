@@ -1,7 +1,7 @@
 {
   "name": "webski",
-  "version": "0.1.0",
-  "description": "Site builder helper kind of thing",
+  "version": "0.1.1",
+  "description": "Website builder helper kind of thing",
   "main": "index.js",
   "repository": {
     "type": "git",

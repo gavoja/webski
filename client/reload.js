@@ -1,6 +1,7 @@
 ;(function () {
   'use strict'
 
+  var host = window.location.hostname
   var port = parseInt(window.location.port, 10) + 1
   var intervalId = null
   var ws = null
@@ -28,7 +29,7 @@
       return
     }
 
-    ws = new window.WebSocket('ws://localhost:' + port)
+    ws = new window.WebSocket('ws://' + host + ':' + port)
     ws.onopen = onopen
     ws.onmessage = onmessage
     ws.onclose = onclose
