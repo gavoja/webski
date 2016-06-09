@@ -73,7 +73,6 @@ class Webski {
   }
 
   serve (workingDir, callback) {
-    console.log(path.join(__dirname, '..', 'client'))
     express()
       .use(`/__webski`, express.static(path.join(__dirname, '..', 'client')))
       .use('/', (req, res) => {
