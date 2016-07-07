@@ -1,0 +1,71 @@
+OneDesign
+
+themes
+  dist
+    shell
+      foo.html
+      bar.html
+      data
+        foo.json
+        bar.json
+      css
+        main.css
+        assets
+          img
+          fonts
+      js
+        main.js
+    shell-rtl
+  src
+    _base
+      ect
+        pages
+        components
+        snippets
+      js
+        lib
+        components
+      less
+        lib
+        base
+        components
+      assets
+      data
+        foo.json
+        bar.json
+    shell
+      ect
+        foo.ect
+        bar.ect
+      js
+        main.js
+      less
+        main.less
+
+themes
+  dist
+    foo.html
+    bar.html
+
+    themes
+      rio
+
+    main.css
+      main.js
+      theme.json
+  src
+  _base
+    html
+    js
+    less
+    static
+  rio
+    html
+    js
+    less
+    static
+    config.json
+  rio-rtl
+    ...
+  irm
+    ...
