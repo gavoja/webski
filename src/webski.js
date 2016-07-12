@@ -7,7 +7,7 @@ const chalk = require('chalk')
 const express = require('express')
 const filelist = require('./helpers/filelist')
 const mime = require('mime-types')
-const WebSocketServer = require('ws').Server
+const WebSocket = require('ws')
 
 const PUBLIC_PATH = path.join(__dirname, '..', 'public')
 const PUBLIC_FRAGMENT = '__webski'
@@ -56,7 +56,9 @@ class Webski {
 
   reloadClient (wss) {
     wss.clients.forEach((client) => {
-      client.send('reload')
+      if (client.readyState === WebSocket.OPEN) {
+        client.send('reload')
+      }
     })
   }
 
@@ -72,17 +74,17 @@ class Webski {
       if (err) {
         this.setContentType(res, '.txt').status('500').send(`Error: ${err.toString()}`)
       }
-      let html = filelist(this.workingDir)
+      let html = filelist(this.serveDir)
       data = data.replace('DATA', html)
       this.setContentType(res, '.html').status('404').send(data + INJECT)
     })
   }
 
-  serve (workingDir, callback) {
+  serve (callback) {
     express()
       .use(`/${PUBLIC_FRAGMENT}`, express.static(PUBLIC_PATH))
       .use('/', (req, res) => {
-        let localPath = path.join(workingDir,
+        let localPath = path.join(this.serveDir,
           req.path.endsWith('/') ? req.path + 'index.html' : req.path)
         let ext = path.extname(localPath)
 
@@ -106,7 +108,7 @@ class Webski {
         console.log(`Listening: ${chalk.yellow(host)}`)
       })
 
-    let wss = new WebSocketServer({
+    let wss = new WebSocket.Server({
       host: this.hostname,
       port: this.port + 1
     })
