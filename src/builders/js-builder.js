@@ -14,6 +14,10 @@ class JSBuilder extends Builder {
     this.target = path.join(workingDir, 'main.js')
   }
 
+  getWriteStream () {
+    return fs.createWriteStream(this.target)
+  }
+
   build (filePath, callback) {
     // Check if applicable.
     if (filePath && !filePath.startsWith(this.root)) {
@@ -36,7 +40,7 @@ class JSBuilder extends Builder {
         }
         callback(false)
       })
-      .pipe(fs.createWriteStream(this.target))
+      .pipe(this.getWriteStream())
       .on('finish', () => {
         console.log(`JS built: ${this.target}`)
         callback(true)
