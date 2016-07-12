@@ -18,6 +18,7 @@ class Webski {
   constructor (args) {
     args = args || {}
     this.workingDir = args.workingDir
+    this.serveDir = args.serveDir || args.workingDir
     this.hostname = args.hostname
     this.port = args.port
     this.builders = []
@@ -29,7 +30,7 @@ class Webski {
   }
 
   run (onChange) {
-    let wss = this.serve(this.workingDir)
+    let wss = this.serve(this.serveDir)
 
     // Build all.
     this.builders.forEach((builders) => {
