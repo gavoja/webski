@@ -1,6 +1,6 @@
 {
   "name": "webski",
-  "version": "0.3.5",
+  "version": "0.3.6",
   "description": "Minimalist website builder",
   "main": "index.js",
   "repository": {
@@ -23,7 +23,7 @@
   "dependencies": {
     "babel-preset-es2015": "^6.14.0",
     "babelify": "^7.3.0",
-    "browserify": "^13.1.0",
+    "np ": "^13.1.0",
     "chalk": "^1.1.3",
     "express": "^4.13.4",
     "left-pad": "^1.1.0",
