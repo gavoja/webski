@@ -37,7 +37,7 @@ class Webski {
 
         // Reload at the end if anything changed.
         if (i === this.builders.length - 1 && changed) {
-          this.reloadClient(wss)
+          wss && this.reloadClient(wss)
           callback && callback()
         }
       })
@@ -45,7 +45,7 @@ class Webski {
   }
 
   run (once, callback) {
-    let wss = this.serve(this.serveDir)
+    let wss = once ? null : this.serve(this.serveDir)
 
     this.build(null, wss, callback)
 
