@@ -29,26 +29,33 @@ class Webski {
     return this
   }
 
-  run (onChange) {
-    let wss = this.serve(this.serveDir)
+  build (filePath, wss, callback) {
+    let changed = false
+    this.builders.forEach((builder, i) => {
+      builder.build(filePath, (success) => {
+        changed = changed || success
 
-    // Build all.
-    this.builders.forEach((builders) => {
-      builders.build(null, (result) => {
-        result && this.reloadClient(wss)
+        // Reload at the end if anything changed.
+        if (i === this.builders.length - 1 && changed) {
+          this.reloadClient(wss)
+          callback && callback()
+        }
       })
     })
+  }
+
+  run (once, callback) {
+    let wss = this.serve(this.serveDir)
+
+    this.build(null, wss, callback)
+
+    if (once) {
+      return
+    }
 
     watch(this.workingDir, (filePath) => {
-      // `Changed: ${filePath)}`
       console.log(`Changed: ${chalk.green(filePath)}`)
-
-      // Apply builders.
-      this.builders.forEach((builders) => {
-        builders.build(filePath, (success) => {
-          success && this.reloadClient(wss)
-        })
-      })
+      this.build(filePath, wss, callback)
     })
 
     console.log(`Watching: ${chalk.yellow(this.workingDir)}`)

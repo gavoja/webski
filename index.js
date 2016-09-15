@@ -20,10 +20,10 @@ let main = () => {
   })
 
   webski
-    .addBuilder(HTMLBuilder)
-    .addBuilder(JSBuilder)
+    // .addBuilder(HTMLBuilder)
+    // .addBuilder(JSBuilder)
     .addBuilder(LessBuilder)
-    .addBuilder(StylusBuilder)
+    // .addBuilder(StylusBuilder)
 
   webski.run()
 }
