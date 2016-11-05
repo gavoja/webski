@@ -1,43 +1,45 @@
 'use strict'
 
-const fs = require('fs')
+const fs = require('fs-extra')
 const path = require('path')
 const stylus = require('stylus')
-const Builder = require('./builder').Builder
+const printError = require('./../utils/print-error.js')
+const chalk = require('chalk')
 
-class StylusBuilder extends Builder {
-  constructor (workingDir) {
-    super(workingDir)
-    this.root = path.join(workingDir, 'stylus')
-    this.source = path.join(this.root, 'main.styl')
-    this.target = path.join(workingDir, 'main.css')
-  }
-
-  build (filePath, callback) {
+class StylusBuilder {
+  build (src, dst, files, callback) {
     // Check if applicable.
-    if (filePath && !filePath.startsWith(this.root)) {
+    if (!files.some(f => f.endsWith('.styl'))) {
       return callback(false)
     }
 
-    // Skip if no source.
-    if (!fs.existsSync(this.source)) {
+    // Get source and target.
+    let sourceDir = path.join(src, 'css')
+    let source = path.join(sourceDir, 'main.styl')
+    if (!fs.existsSync(source)) {
       return callback(false)
     }
+    let targetDir = path.join(dst, 'css')
+    fs.ensureDirSync(targetDir)
+    let target = path.join(targetDir, 'main.css')
 
-    stylus(fs.readFileSync(this.source, 'utf8'))
-      .set('filename', this.target)
-      .set('paths', [ this.root ])
+    // Render Less.
+    let timestamp = Date.now()
+    console.log(`Building Stylus: ${chalk.gray(source)} ...`)
+    stylus(fs.readFileSync(source, 'utf8'))
+      .set('filename', target)
+      .set('paths', [ sourceDir ])
       .render((err, css) => {
         if (err) {
-          console.error('Stylus error:\n', err.toString())
+          printError(err)
           return callback(false)
         }
 
-        fs.writeFileSync(this.target, css)
-        console.log(`Stylus built: ${this.target}`)
+        fs.writeFileSync(target, css)
+        console.log(`Built Stylus in ${Date.now() - timestamp} ms: ${chalk.gray(target)}`)
         callback(true)
       })
   }
 }
 
-module.exports.StylusBuilder = StylusBuilder
+module.exports = StylusBuilder

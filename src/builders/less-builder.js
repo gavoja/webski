@@ -1,60 +1,49 @@
 'use strict'
 
-const fs = require('fs')
+const fs = require('fs-extra')
 const path = require('path')
 const less = require('less')
+const printError = require('./../utils/print-error.js')
+const chalk = require('chalk')
 const autoprefixer = require('autoprefixer')
 const postcss = require('postcss')
-const leftPad = require('left-pad')
-const Builder = require('./builder').Builder
 
-class LessBuilder extends Builder {
-  constructor (workingDir) {
-    super(workingDir)
-    this.root = path.join(workingDir, 'less')
-    this.source = path.join(this.root, 'main.less')
-    this.target = path.join(workingDir, 'main.css')
-  }
-
-  build (filePath, callback) {
+class LessBuilder {
+  build (src, dst, files, callback) {
     // Check if applicable.
-    if (filePath && !filePath.startsWith(this.root)) {
+    if (!files.some(f => f.endsWith('.less'))) {
       return callback(false)
     }
 
-    // Skip if no source.
-    if (!fs.existsSync(this.source)) {
+    // Get source and target.
+    let source = path.join(src, 'css', 'main.less')
+    if (!fs.existsSync(source)) {
       return callback(false)
     }
+    let targetDir = path.join(dst, 'css')
+    fs.ensureDirSync(targetDir)
+    let target = path.join(targetDir, 'main.css')
 
-    // Render LESS.
-    less.render(fs.readFileSync(this.source, 'utf8'), {
-      filename: this.source
+    // Render Less.
+    let timestamp = Date.now()
+    console.log(`Building Less: ${chalk.gray(source)} ...`)
+    less.render(fs.readFileSync(source, 'utf8'), {
+      filename: source
     }).then((output) => {
       postcss([ autoprefixer({ browsers: ['> 1%', 'last 3 versions', 'IE >= 9'] }) ]).process(output.css).then((result) => {
         result.warnings().forEach((warn) => {
           console.warn(warn.toString())
         })
 
-        fs.writeFileSync(this.target, result.css)
-        console.log(`Less built: ${this.target}`)
+        fs.writeFileSync(target, output.css)
+        console.log(`Built Less in ${Date.now() - timestamp} ms: ${chalk.gray(target)}`)
         callback(true)
       })
     }, (err) => {
-      this.printError(err)
+      printError(err)
       callback(false)
-    })
-  }
-
-  printError (err) {
-    console.error(`Less error in ${err.filename} (${err.line}:${err.column}): ${err.message}`)
-    err.extract.forEach((chunk, i) => {
-      if (chunk) {
-        let line = leftPad(err.line + i, 8)
-        console.error(`${line} | ${chunk}`)
-      }
     })
   }
 }
 
-module.exports.LessBuilder = LessBuilder
+module.exports = LessBuilder

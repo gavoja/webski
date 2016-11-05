@@ -3,34 +3,29 @@
 const browserify = require('browserify')
 const babelPresetEs2015 = require('babel-preset-es2015')
 const path = require('path')
-const fs = require('fs')
-const Builder = require('./builder').Builder
+const fs = require('fs-extra')
+const chalk = require('chalk')
 
-class JSBuilder extends Builder {
-  constructor (workingDir) {
-    super(workingDir)
-    this.root = path.join(workingDir, 'js')
-    this.source = path.join(this.root, 'main.js')
-    this.target = path.join(workingDir, 'main.js')
-  }
-
-  getWriteStream () {
-    return fs.createWriteStream(this.target)
-  }
-
-  build (filePath, callback) {
+class JSBuilder {
+  build (src, dst, files, callback) {
     // Check if applicable.
-    if (filePath && !filePath.startsWith(this.root)) {
+    if (!files.some(f => f.endsWith('.js') || f.endsWith('.es'))) {
       return callback(false)
     }
 
-    // Skip if no source.
-    if (!fs.existsSync(this.source)) {
+    // Get source and target.
+    let source = path.join(src, 'js', 'main.js')
+    if (!fs.existsSync(source)) {
       return callback(false)
     }
+    let targetDir = path.join(dst, 'js')
+    fs.ensureDirSync(targetDir)
+    let target = path.join(targetDir, 'main.js')
 
-    // Build.
-    browserify({ entries: this.source, extensions: ['.js', '.es'], debug: false })
+    // Build JS.
+    let timestamp = Date.now()
+    console.log(`Building JS: ${chalk.gray(source)} ...`)
+    browserify({ entries: source, extensions: ['.js', '.es'], debug: false })
       .transform('babelify', { presets: [babelPresetEs2015] })
       .bundle()
       .on('error', (err) => {
@@ -40,12 +35,12 @@ class JSBuilder extends Builder {
         }
         callback(false)
       })
-      .pipe(this.getWriteStream())
+      .pipe(fs.createWriteStream(target))
       .on('finish', () => {
-        console.log(`JS built: ${this.target}`)
+        console.log(`Built JS in ${Date.now() - timestamp} ms: ${chalk.gray(target)}`)
         callback(true)
       })
   }
 }
 
-module.exports.JSBuilder = JSBuilder
+module.exports = JSBuilder

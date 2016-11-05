@@ -1,29 +1,26 @@
 'use strict'
 
-const path = require('path')
 const minimist = require('minimist')
-const Webski = require('./src/webski').Webski
-const Builder = require('./src/builders/builder').Builder
-const HTMLBuilder = require('./src/builders/html-builder').HTMLBuilder
-const JSBuilder = require('./src/builders/js-builder').JSBuilder
-const LessBuilder = require('./src/builders/less-builder').LessBuilder
-const StylusBuilder = require('./src/builders/stylus-builder').StylusBuilder
+const Webski = require('./src/webski')
+const AssetBuilder = require('./src/builders/asset-builder')
+const JSBuilder = require('./src/builders/js-builder')
+const LessBuilder = require('./src/builders/less-builder')
+const StylusBuilder = require('./src/builders/stylus-builder')
 
 let main = () => {
   let args = minimist(process.argv.slice(2))
-  let workingDir = path.resolve(args.w || process.cwd())
-
   let webski = new Webski({
-    workingDir: workingDir,
-    hostname: args.h || 'localhost',
-    port: args.p || 8000
+    src: args.s,
+    dst: args.d,
+    hostname: args.h,
+    port: args.p
   })
 
   webski
-    .addBuilder(HTMLBuilder)
-    .addBuilder(JSBuilder)
-    .addBuilder(LessBuilder)
-    .addBuilder(StylusBuilder)
+    .addBuilder(new AssetBuilder())
+    .addBuilder(new JSBuilder())
+    .addBuilder(new LessBuilder())
+    .addBuilder(new StylusBuilder())
 
   webski.run()
 }
@@ -33,10 +30,9 @@ if (require.main === module) {
 }
 
 module.exports = {
-  Webski: Webski,
-  Builder: Builder,
-  HTMLBuilder: HTMLBuilder,
-  JSBuilder: JSBuilder,
-  LessBuilder: LessBuilder,
-  StylusBuilder: StylusBuilder
+  Webski,
+  AssetBuilder,
+  JSBuilder,
+  LessBuilder,
+  StylusBuilder
 }
