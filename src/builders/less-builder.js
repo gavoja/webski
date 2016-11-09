@@ -3,6 +3,8 @@
 const fs = require('fs')
 const path = require('path')
 const less = require('less')
+const autoprefixer = require('autoprefixer')
+const postcss = require('postcss')
 const leftPad = require('left-pad')
 const Builder = require('./builder').Builder
 
@@ -29,9 +31,15 @@ class LessBuilder extends Builder {
     less.render(fs.readFileSync(this.source, 'utf8'), {
       filename: this.source
     }).then((output) => {
-      fs.writeFileSync(this.target, output.css)
-      console.log(`Less built: ${this.target}`)
-      callback(true)
+      postcss([ autoprefixer({ browsers: ['> 1%', 'last 3 versions', 'IE >= 9'] }) ]).process(output.css).then((result) => {
+        result.warnings().forEach((warn) => {
+          console.warn(warn.toString())
+        })
+
+        fs.writeFileSync(this.target, result.css)
+        console.log(`Less built: ${this.target}`)
+        callback(true)
+      })
     }, (err) => {
       this.printError(err)
       callback(false)
