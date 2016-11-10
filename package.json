@@ -1,6 +1,6 @@
 {
   "name": "webski",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Minimalist website builder",
   "main": "index.js",
   "repository": {
@@ -35,7 +35,7 @@
     "path-sort": "0.1.0",
     "postcss": "5.2.4",
     "reload": "0.7.0",
-    "simple-watcher": "1.0.5",
+    "simple-watcher": "2.0.1",
     "stylus": "0.54.5",
     "ws": "1.1.0"
   }

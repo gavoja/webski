@@ -10,7 +10,7 @@ const walk = require('./utils/walk.js')
 const mime = require('mime-types')
 const WebSocket = require('ws')
 
-const DIST_DIR = 'dist'
+const DIST_DIR = '.dist'
 const PUBLIC_PATH = path.join(__dirname, '..', 'www')
 const PUBLIC_FRAGMENT = '__webski'
 const INJECT = `
@@ -20,7 +20,7 @@ class Webski {
   constructor (args) {
     args = args || {}
     this.src = path.resolve(args.src || process.cwd())
-    this.dst = path.resolve(args.dst || path.join(process.cwd(), DIST_DIR))
+    this.dst = path.resolve(args.dst || path.join(this.src, DIST_DIR))
     this.app = args.app || express()
     this.hostname = args.hostname || 'localhost'
     this.port = args.port || 8000
@@ -60,13 +60,17 @@ class Webski {
     let wss = this.serve(this.dst)
     this.clean(this.dst)
     this.build(this.src, this.dst, null, callback)
-    watch(this.src, f => {
-      if (f.startsWith(this.dst)) {
-        return
-      }
+    watch(this.src, files => {
+      let filteredFiles = files.filter(f => {
+        if (f.startsWith(this.dst)) {
+          return false
+        }
 
-      console.log(`Changed: ${chalk.gray(f)}`)
-      this.build(this.src, this.dst, [f], (changed) => {
+        console.log(`Changed: ${chalk.gray(f)}`)
+        return true
+      })
+
+      this.build(this.src, this.dst, filteredFiles, (changed) => {
         if (changed) {
           this.reloadClient(wss)
         }
