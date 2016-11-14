@@ -7,6 +7,10 @@ const fs = require('fs-extra')
 const chalk = require('chalk')
 
 class JSBuilder {
+  getEntryFile () {
+    return 'main'
+  }
+
   build (src, dst, files, callback) {
     // Check if applicable.
     if (!files.some(f => f.endsWith('.js') || f.endsWith('.es'))) {
@@ -14,13 +18,14 @@ class JSBuilder {
     }
 
     // Get source and target.
-    let source = path.join(src, 'js', 'main.js')
+    let entryFile = this.getEntryFile()
+    let source = path.join(src, 'js', `${entryFile}.js`)
     if (!fs.existsSync(source)) {
       return callback(false)
     }
     let targetDir = path.join(dst, 'js')
     fs.ensureDirSync(targetDir)
-    let target = path.join(targetDir, 'main.js')
+    let target = path.join(targetDir, `${entryFile}.js`)
 
     // Build JS.
     let timestamp = Date.now()

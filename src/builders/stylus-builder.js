@@ -7,6 +7,10 @@ const printError = require('./../utils/print-error.js')
 const chalk = require('chalk')
 
 class StylusBuilder {
+  getEntryFile () {
+    return 'main'
+  }
+
   build (src, dst, files, callback) {
     // Check if applicable.
     if (!files.some(f => f.endsWith('.styl'))) {
@@ -14,14 +18,15 @@ class StylusBuilder {
     }
 
     // Get source and target.
+    let entryFile = this.getEntryFile()
     let sourceDir = path.join(src, 'css')
-    let source = path.join(sourceDir, 'main.styl')
+    let source = path.join(sourceDir, `${entryFile}.styl`)
     if (!fs.existsSync(source)) {
       return callback(false)
     }
     let targetDir = path.join(dst, 'css')
     fs.ensureDirSync(targetDir)
-    let target = path.join(targetDir, 'main.css')
+    let target = path.join(targetDir, `${entryFile}.css`)
 
     // Render Less.
     let timestamp = Date.now()

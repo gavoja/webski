@@ -9,6 +9,10 @@ const autoprefixer = require('autoprefixer')
 const postcss = require('postcss')
 
 class LessBuilder {
+  getEntryFile () {
+    return 'main'
+  }
+
   build (src, dst, files, callback) {
     // Check if applicable.
     if (!files.some(f => f.endsWith('.less'))) {
@@ -16,13 +20,14 @@ class LessBuilder {
     }
 
     // Get source and target.
-    let source = path.join(src, 'css', 'main.less')
+    let entryFile = this.getEntryFile()
+    let source = path.join(src, 'css', `${entryFile}.less`)
     if (!fs.existsSync(source)) {
       return callback(false)
     }
     let targetDir = path.join(dst, 'css')
     fs.ensureDirSync(targetDir)
-    let target = path.join(targetDir, 'main.css')
+    let target = path.join(targetDir, `${entryFile}.css`)
 
     // Render Less.
     let timestamp = Date.now()
