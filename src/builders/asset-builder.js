@@ -11,6 +11,7 @@ const EXCLUDED_EXTENSIONS = [
 class AssetBuilder {
   build (src, dst, files, callback) {
     let changed = false
+
     files.forEach(f => {
       let target = path.join(dst, f.substr(src.length))
       if (EXCLUDED_EXTENSIONS.some(ext => f.endsWith(ext))) {
