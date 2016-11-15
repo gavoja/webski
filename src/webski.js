@@ -28,7 +28,7 @@ class Webski {
     this.port = args.port || 8000
     this.builders = []
     this.queue = []
-    this.lock = false
+    this.lock = true
     console.log(`Building from ${chalk.gray(this.src)} to ${chalk.gray(this.dst)}.`)
   }
 
@@ -60,25 +60,27 @@ class Webski {
   }
 
   run (callback) {
-    let wss = this.serve(this.dst)
     this.clean(this.dst)
-    this.build(this.src, this.dst, null, callback)
 
     // Enqueue items.
     watch(this.src, file => {
       this.queue.push(file)
     })
+    console.log(`Watching: ${chalk.gray(this.src)}`)
+
+    // Do the initial build.
+    this.build(this.src, this.dst, null, (result) => {
+      this.lock = false
+      callback && callback(result)
+    })
+
+    // Serve content.
+    let wss = this.serve(this.dst)
 
     // Handle queue.
     setInterval(() => {
-      if (this.lock) {
-        return
-      }
-
       this.processQueue(wss, callback)
     }, INTERVAL)
-
-    console.log(`Watching: ${chalk.gray(this.src)}`)
   }
 
   processQueue (wss, callback) {
