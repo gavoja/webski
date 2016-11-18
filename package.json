@@ -1,6 +1,6 @@
 {
   "name": "webski",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "description": "Minimalist website builder",
   "main": "index.js",
   "repository": {

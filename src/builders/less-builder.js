@@ -40,7 +40,7 @@ class LessBuilder {
           console.warn(warn.toString())
         })
 
-        fs.writeFileSync(target, output.css)
+        fs.writeFileSync(target, result.css)
         console.log(`Built Less in ${Date.now() - timestamp} ms: ${chalk.gray(target)}`)
         callback(true)
       })
