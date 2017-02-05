@@ -12,7 +12,7 @@ const WebSocket = require('ws')
 
 const DIST_DIR = 'dist'
 const SRC_DIR = 'src'
-const PUBLIC_PATH = path.join(__dirname, '..', 'www')
+const PUBLIC_PATH = path.join(__dirname, '..', 'assets', 'www')
 const PUBLIC_FRAGMENT = '__webski'
 const INTERVAL = 300
 const INJECT = `

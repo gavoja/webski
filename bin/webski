@@ -1,0 +1,3 @@
+#!/usr/bin/env node
+const webski = require('../index')
+webski.main()
