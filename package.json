@@ -1,6 +1,6 @@
 {
   "name": "webski",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "Minimalist website builder",
   "main": "index.js",
   "repository": {
@@ -40,5 +40,8 @@
     "simple-watcher": "^3.0.0",
     "stylus": "0.54.5",
     "ws": "^2.0.2"
-  }
+  },
+  "bin": {
+    "aemsync": "./bin/webski"
+  },
 }
