@@ -1,3 +1,4 @@
 #!/usr/bin/env node
-const webski = require('../index')
-webski.main()
+const Bootstrap = require('../index').Bootstrap
+let b = new Bootstrap()
+b.main()
