@@ -36,6 +36,7 @@
     "postcss": "5.2.5",
     "simple-watcher": "3.0.0",
     "stylus": "0.54.5",
-    "ws": "1.1.1"
+    "ws": "1.1.1",
+    "exorcist": "0.4.0"
   }
 }
