@@ -42,12 +42,11 @@ class Webski {
     fs.emptyDirSync(this.dst)
   }
 
-  build (src, dst, files, callback) {
-    files = files || walk(src)
+  build (files, callback) {
     let changed = false
     let counter = 0
     this.builders.forEach((builder, i) => {
-      builder.build(src, dst, files, (success) => {
+      builder.build(this.src, this.dst, files, success => {
         counter += 1
         changed = changed || success
 
@@ -57,6 +56,12 @@ class Webski {
         }
       })
     })
+  }
+
+  buildAll (callback) {
+    let files = walk(this.src)
+    // Do the initial build.
+    this.build(files, callback)
   }
 
   run (callback) {
@@ -69,7 +74,7 @@ class Webski {
     console.log(`Watching: ${chalk.gray(this.src)}`)
 
     // Do the initial build.
-    this.build(this.src, this.dst, null, (result) => {
+    this.buildAll(result => {
       this.lock = false
       callback && callback(result)
     })
@@ -107,7 +112,7 @@ class Webski {
     }
 
     // Build.
-    this.build(this.src, this.dst, files, (changed) => {
+    this.build(files, changed => {
       if (changed) {
         this.reloadClient(wss)
       }
