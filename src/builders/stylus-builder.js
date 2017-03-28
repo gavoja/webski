@@ -27,23 +27,28 @@ class StylusBuilder {
     let targetDir = path.join(dst, 'css')
     fs.ensureDirSync(targetDir)
     let target = path.join(targetDir, `${entryFile}.css`)
+    let targetMap = path.join(targetDir, `${entryFile}.css.map`)
 
     // Render Less.
     let timestamp = Date.now()
     console.log(`Building Stylus: ${chalk.gray(source)} ...`)
-    stylus(fs.readFileSync(source, 'utf8'))
+    let style = stylus(fs.readFileSync(source, 'utf8'))
       .set('filename', target)
-      .set('paths', [ sourceDir ])
-      .render((err, css) => {
-        if (err) {
-          printError(err)
-          return callback(false)
-        }
+      .set('paths', [sourceDir])
+      .set('sourcemap', {comment: false})
+    style.render((err, css) => {
+      if (err) {
+        printError(err)
+        return callback(false)
+      }
 
-        fs.writeFileSync(target, css)
-        console.log(`Built Stylus in ${Date.now() - timestamp} ms: ${chalk.gray(target)}`)
-        callback(true)
-      })
+      fs.writeFileSync(target, css)
+      if (style.sourcemap) {
+        fs.writeFileSync(targetMap, style.sourcemap)
+      }
+      console.log(`Built Stylus in ${Date.now() - timestamp} ms: ${chalk.gray(target)}`)
+      callback(true)
+    })
   }
 }
 
