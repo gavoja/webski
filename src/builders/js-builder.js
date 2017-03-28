@@ -2,6 +2,7 @@
 
 const browserify = require('browserify')
 const babelPresetEs2015 = require('babel-preset-es2015')
+const babelify = require('babelify')
 const path = require('path')
 const fs = require('fs-extra')
 const chalk = require('chalk')
@@ -33,7 +34,7 @@ class JSBuilder {
     let timestamp = Date.now()
     console.log(`Building JS: ${chalk.gray(source)} ...`)
     browserify({ entries: source, extensions: ['.js', '.es'], debug: true })
-      .transform('babelify', { presets: [babelPresetEs2015] })
+      .transform(babelify, { presets: [babelPresetEs2015] })
       .bundle()
       .on('error', (err) => {
         console.error('Babel error:\n', err.toString())
