@@ -6,6 +6,7 @@ const babelify = require('babelify')
 const path = require('path')
 const fs = require('fs-extra')
 const chalk = require('chalk')
+const exorcist = require('exorcist')
 
 class JSBuilder {
   getEntryFile () {
@@ -27,11 +28,12 @@ class JSBuilder {
     let targetDir = path.join(dst, 'js')
     fs.ensureDirSync(targetDir)
     let target = path.join(targetDir, `${entryFile}.js`)
+    let targetMap = path.join(targetDir, `${entryFile}.js.map`)
 
     // Build JS.
     let timestamp = Date.now()
     console.log(`Building JS: ${chalk.gray(source)} ...`)
-    browserify({ entries: source, extensions: ['.js', '.es'], debug: false })
+    browserify({ entries: source, extensions: ['.js', '.es'], debug: true })
       .transform(babelify, { presets: [babelPresetEs2015] })
       .bundle()
       .on('error', (err) => {
@@ -41,6 +43,7 @@ class JSBuilder {
         }
         callback(false)
       })
+      .pipe(exorcist(targetMap))
       .pipe(fs.createWriteStream(target))
       .on('finish', () => {
         console.log(`Built JS in ${Date.now() - timestamp} ms: ${chalk.gray(target)}`)

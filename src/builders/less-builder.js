@@ -28,19 +28,25 @@ class LessBuilder {
     let targetDir = path.join(dst, 'css')
     fs.ensureDirSync(targetDir)
     let target = path.join(targetDir, `${entryFile}.css`)
+    let targetMap = path.join(targetDir, `${entryFile}.css.map`)
 
     // Render Less.
     let timestamp = Date.now()
     console.log(`Building Less: ${chalk.gray(source)} ...`)
     less.render(fs.readFileSync(source, 'utf8'), {
-      filename: source
+      filename: source,
+      sourceMap: {sourceMapBasepath: path.dirname(require.main.filename), sourceMapFileInline: true, outputSourceFiles: true}
     }).then((output) => {
-      postcss([ autoprefixer({ browsers: ['> 1%', 'last 3 versions', 'IE >= 9'] }) ]).process(output.css).then((result) => {
+      postcss([ autoprefixer({ browsers: ['> 1%', 'last 3 versions', 'IE >= 9'] }) ]).process(output.css, {map: {annotation: `${entryFile}.css.map`}}).then((result) => {
         result.warnings().forEach((warn) => {
           console.warn(warn.toString())
         })
 
         fs.writeFileSync(target, result.css)
+        if (result.map) {
+          fs.writeFileSync(targetMap, result.map)
+        }
+
         console.log(`Built Less in ${Date.now() - timestamp} ms: ${chalk.gray(target)}`)
         callback(true)
       })
