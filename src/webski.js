@@ -80,7 +80,7 @@ class Webski {
     })
 
     // Serve content.
-    let wss = this.serve(this.dst)
+    let wss = this.serve()
 
     // Handle queue.
     setInterval(() => {
