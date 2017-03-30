@@ -29,7 +29,6 @@ class Webski {
     this.builders = []
     this.queue = []
     this.lock = true
-    console.log(`Building from ${chalk.gray(this.src)} to ${chalk.gray(this.dst)}.`)
   }
 
   addBuilder (builder) {
@@ -65,6 +64,7 @@ class Webski {
   }
 
   run (callback) {
+    console.log(`Building from ${chalk.gray(this.src)} to ${chalk.gray(this.dst)}.`)
     this.clean(this.dst)
 
     // Enqueue items.
@@ -178,6 +178,7 @@ class Webski {
       .listen(this.port, this.hostname, () => {
         let host = `${this.hostname}:${this.port}`
         console.log(`Listening: ${chalk.blue(host)}`)
+        callback && callback()
       })
 
     this.wss = new WebSocket.Server({
