@@ -27,6 +27,7 @@ class Webski {
     this.app = args.app || express()
     this.hostname = args.hostname || 'localhost'
     this.port = args.port || 8000
+    this.initialPort = this.port
     this.builders = []
     this.queue = []
     this.lock = true
@@ -74,22 +75,22 @@ class Webski {
     })
     console.log(`Watching: ${chalk.gray(this.src)}`)
 
-    // Do the initial build.
-    this.buildAll(result => {
-      this.lock = false
-      callback && callback(result)
-    })
-
     // Serve content.
-    let wss = this.serve()
+    this.serve(() => {
+      // Do the initial build.
+      this.buildAll(result => {
+        this.lock = false
+        callback && callback(result)
+      })
+    })
 
     // Handle queue.
     setInterval(() => {
-      this.processQueue(wss, callback)
+      this.processQueue(callback)
     }, INTERVAL)
   }
 
-  processQueue (wss, callback) {
+  processQueue (callback) {
     if (this.lock) {
       return
     }
@@ -115,7 +116,7 @@ class Webski {
     // Build.
     this.build(files, changed => {
       if (changed) {
-        this.reloadClient(wss)
+        this.reloadClient()
       }
 
       callback && callback(changed)
@@ -154,18 +155,19 @@ class Webski {
     })
   }
 
-  listen (port, callback) {
-    if (port - this.port > PORT_RANGE) {
+  listen (callback) {
+    if (this.port - this.initialPort > PORT_RANGE) {
       return console.error('Unable to start the server.')
     }
 
     this.app
     this.app
-      .listen(port, this.hostname, () => callback(port))
+      .listen(this.port, this.hostname, callback)
       .on('error', err => {
         if (err.message.indexOf('EADDRINUSE') !== -1) {
-          console.log(`Unable to start server on port ${port}.`)
-          this.listen(port + 1, callback)
+          console.log(`Unable to start server on port ${this.port}.`)
+          ++this.port
+          this.listen(callback)
         }
       })
   }
@@ -193,12 +195,12 @@ class Webski {
         })
       })
 
-    this.listen(this.port, (port) => {
-      let host = `${this.hostname}:${port}`
+    this.listen(() => {
+      let host = `${this.hostname}:${this.port}`
       console.log(`Listening: ${chalk.blue(host)}`)
       this.wss = new WebSocket.Server({
         host: this.hostname,
-        port: port + 1
+        port: this.port + 1
       })
       callback && callback()
     })
