@@ -15,6 +15,7 @@ const SRC_DIR = 'src'
 const PUBLIC_PATH = path.join(__dirname, '..', 'assets', 'www')
 const PUBLIC_FRAGMENT = '__webski'
 const INTERVAL = 300
+const PORT_RANGE = 1000
 const INJECT = `
 <script src="/${PUBLIC_FRAGMENT}/reload.js"></script>`
 
@@ -153,6 +154,22 @@ class Webski {
     })
   }
 
+  listen (port, callback) {
+    if (port - this.port > PORT_RANGE) {
+      return console.error('Unable to start the server.')
+    }
+
+    this.app
+    this.app
+      .listen(port, this.hostname, () => callback(port))
+      .on('error', err => {
+        if (err.message.indexOf('EADDRINUSE') !== -1) {
+          console.log(`Unable to start server on port ${port}.`)
+          this.listen(port + 1, callback)
+        }
+      })
+  }
+
   serve (callback) {
     this.app
       .use(`/${PUBLIC_FRAGMENT}`, express.static(PUBLIC_PATH))
@@ -175,15 +192,15 @@ class Webski {
           this.setContentType(res, ext).send(data + INJECT)
         })
       })
-      .listen(this.port, this.hostname, () => {
-        let host = `${this.hostname}:${this.port}`
-        console.log(`Listening: ${chalk.blue(host)}`)
-        callback && callback()
-      })
 
-    this.wss = new WebSocket.Server({
-      host: this.hostname,
-      port: this.port + 1
+    this.listen(this.port, (port) => {
+      let host = `${this.hostname}:${port}`
+      console.log(`Listening: ${chalk.blue(host)}`)
+      this.wss = new WebSocket.Server({
+        host: this.hostname,
+        port: port + 1
+      })
+      callback && callback()
     })
   }
 }
